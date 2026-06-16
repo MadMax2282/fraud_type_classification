@@ -6,29 +6,33 @@ warnings.filterwarnings("ignore", category=ConvergenceWarning)
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from preprocessing import load_data, get_fraud_subset, balanced_sample, build_features, TARGET
+from preprocessing import load_data, prepare_balanced_dataset, build_features, TARGET
 from data_analysis import analyze_dataset
 from models import train_and_evaluate
 from visualization import results_table, accuracy_bar, tsne_plots
 
 
 DATA_PATH = os.path.join("data", "bank_fraud.csv")
-RESULTS_DIR = "results"
-FIG_DIR = os.path.join(RESULTS_DIR, "figures")
-SAMPLE_PER_CLASS = 2000
+EDA_DIR = os.path.join("visualizations", "eda")
+RESULTS_DIR = os.path.join("visualizations", "results")
+REPORTS_DIR = "reports"
+MODELS_DIR = "models"
 TEST_SIZE = 0.3
 RANDOM_STATE = 42
 
 
 def main():
-    os.makedirs(FIG_DIR, exist_ok=True)
+    os.makedirs(EDA_DIR, exist_ok=True)
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+    os.makedirs(REPORTS_DIR, exist_ok=True)
+    os.makedirs(MODELS_DIR, exist_ok=True)
 
     df = load_data(DATA_PATH)
-    fraud = get_fraud_subset(df)
+    
+    sample = prepare_balanced_dataset(df, RANDOM_STATE)
+    
+    analyze_dataset(sample, EDA_DIR)
 
-    analyze_dataset(df, fraud, FIG_DIR)
-
-    sample = balanced_sample(fraud, SAMPLE_PER_CLASS, RANDOM_STATE)
     x, y_text, feature_names, numeric_cols = build_features(sample)
 
     encoder = LabelEncoder()
@@ -38,7 +42,6 @@ def main():
     print()
     print("2. Підготовка даних")
     print(f"Розмір вибірки для моделювання: {x.shape[0]} об'єктів, {x.shape[1]} ознак")
-    print(f"Видалено неінформативні стовпці: ідентифікатори, дата, час, is_fraud")
     print(f"Кількість класів: {len(class_names)}")
     print()
 
@@ -49,15 +52,15 @@ def main():
     print()
 
     results, predictions = train_and_evaluate(
-        x_train, x_test, y_train, y_test, class_names, FIG_DIR
+        x_train, x_test, y_train, y_test, class_names
     )
 
-    summary = results_table(results, FIG_DIR, RESULTS_DIR)
-    accuracy_bar(results, FIG_DIR)
-    tsne_plots(x_test, y_test, predictions, class_names, FIG_DIR, RANDOM_STATE)
+    summary = results_table(results, RESULTS_DIR, REPORTS_DIR)
+    accuracy_bar(results, RESULTS_DIR)
+    tsne_plots(x_test, y_test, predictions, class_names, RESULTS_DIR, RANDOM_STATE)
 
     print()
-    print("Роботу завершено. Усі результати збережено у results.")
+    print("Роботу завершено. Усі результати збережено.")
 
 
 if __name__ == "__main__":

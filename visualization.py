@@ -49,8 +49,8 @@ def accuracy_bar(results, fig_dir):
     plt.figure(figsize=(9, 6))
     ax = sns.barplot(x="accuracy", y="model", data=df, hue="model",
                      palette="mako", legend=False)
-    ax.axvline(1 / 6, color="red", linestyle="--", linewidth=1)
-    ax.text(1 / 6 + 0.002, 0.2, "базовий рівень (1/6)", color="red", fontsize=9)
+    ax.axvline(1 / 7, color="red", linestyle="--", linewidth=1)
+    ax.text(1 / 7 + 0.002, 0.2, "базовий рівень (1/7)", color="red", fontsize=9)
     ax.set_title("Порівняння точності моделей")
     ax.set_xlabel("Точність")
     ax.set_ylabel("Модель")

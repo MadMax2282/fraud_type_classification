@@ -40,17 +40,25 @@ def get_classifiers():
     return models
 
 
-def train_and_evaluate(x_train, x_test, y_train, y_test, class_names, fig_dir):
+import joblib
+import pandas as pd
+
+def train_and_evaluate(x_train, x_test, y_train, y_test, class_names):
     print("=" * 60)
     print("3. Навчання та дослідження методів класифікації")
     print("=" * 60)
 
+    models_dir = "models"
+    reports_dir = "reports"
+    cm_dir = os.path.join("visualizations", "results")
+    
+    os.makedirs(models_dir, exist_ok=True)
+    os.makedirs(reports_dir, exist_ok=True)
+    os.makedirs(cm_dir, exist_ok=True)
+
     models = get_classifiers()
     results = []
     predictions = {}
-
-    cm_dir = os.path.join(fig_dir, "confusion_matrix")
-    os.makedirs(cm_dir, exist_ok=True)
 
     for name, model in models.items():
         print("-" * 60)
@@ -61,15 +69,25 @@ def train_and_evaluate(x_train, x_test, y_train, y_test, class_names, fig_dir):
         model.fit(x_train, y_train)
         train_time = time.time() - start
 
+        # Save model
+        safe_name = name.replace(" ", "_").replace("(", "").replace(")", "")
+        model_path = os.path.join(models_dir, f"{safe_name}.pkl")
+        joblib.dump(model, model_path)
+
         y_pred = model.predict(x_test)
         acc = accuracy_score(y_test, y_pred)
 
         print(f"Час навчання: {train_time:.3f} с")
         print(f"Точність на тестовому наборі: {acc:.4f}")
-        print("Звіт по класифікації:")
-        print(classification_report(y_test, y_pred, target_names=class_names, zero_division=0))
+        
+        # Classification report
+        report_dict = classification_report(y_test, y_pred, target_names=class_names, zero_division=0, output_dict=True)
+        report_df = pd.DataFrame(report_dict).transpose()
+        report_path = os.path.join(reports_dir, f"{safe_name}_report.csv")
+        report_df.to_csv(report_path)
+        print(f"Звіт збережено у: {report_path}")
 
-        save_confusion_matrix(y_test, y_pred, class_names, name, cm_dir)
+        save_confusion_matrix(y_test, y_pred, class_names, name, cm_dir, safe_name)
 
         results.append({"model": name, "accuracy": acc, "train_time": train_time})
         predictions[name] = y_pred
@@ -77,9 +95,9 @@ def train_and_evaluate(x_train, x_test, y_train, y_test, class_names, fig_dir):
     return results, predictions
 
 
-def save_confusion_matrix(y_test, y_pred, class_names, name, cm_dir):
+def save_confusion_matrix(y_test, y_pred, class_names, name, cm_dir, safe_name):
     cm = confusion_matrix(y_test, y_pred)
-    plt.figure(figsize=(7, 6))
+    plt.figure(figsize=(8, 7))
     sns.heatmap(
         cm,
         annot=True,
@@ -91,10 +109,9 @@ def save_confusion_matrix(y_test, y_pred, class_names, name, cm_dir):
     plt.title(f"Матриця невідповідностей: {name}")
     plt.xlabel("Прогнозований клас")
     plt.ylabel("Справжній клас")
-    plt.xticks(rotation=30, ha="right")
+    plt.xticks(rotation=45, ha="right")
     plt.yticks(rotation=0)
     plt.tight_layout()
-    safe = name.replace(" ", "_").replace("(", "").replace(")", "")
-    path = os.path.join(cm_dir, f"cm_{safe}.png")
+    path = os.path.join(cm_dir, f"cm_{safe_name}.png")
     plt.savefig(path, dpi=120)
     plt.close()

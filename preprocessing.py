@@ -29,17 +29,20 @@ def load_data(path):
     return df
 
 
-def get_fraud_subset(df):
-    fraud = df[df["is_fraud"] == 1].copy()
-    fraud = fraud.reset_index(drop=True)
-    return fraud
-
-
-def balanced_sample(df, per_class, random_state=42):
+def prepare_balanced_dataset(df, random_state=42):
+    df_copy = df.copy()
+    mask_legit = df_copy["is_fraud"] == 0
+    df_copy.loc[mask_legit, TARGET] = "Legitimate"
+    
+    fraud_df = df_copy[df_copy["is_fraud"] == 1]
+    fraud_counts = fraud_df[TARGET].value_counts()
+    min_count = fraud_counts.min()
+    
     parts = []
-    for label, group in df.groupby(TARGET):
-        n = min(per_class, len(group))
+    for label, group in df_copy.groupby(TARGET):
+        n = min(min_count, len(group))
         parts.append(group.sample(n=n, random_state=random_state))
+        
     sample = pd.concat(parts).sample(frac=1, random_state=random_state)
     return sample.reset_index(drop=True)
 

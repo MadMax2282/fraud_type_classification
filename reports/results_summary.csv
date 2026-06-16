@@ -1,0 +1,13 @@
+model,accuracy,train_time
+Gradient Boosting,0.1905,80.909
+Decision Tree,0.1882,0.42
+Logistic Regression,0.187,0.256
+Extra Trees,0.1863,3.328
+LDA,0.1856,0.154
+SVM (RBF),0.1846,292.941
+Random Forest,0.184,2.627
+Gaussian NB,0.184,0.032
+Ridge Classifier,0.1829,0.047
+AdaBoost,0.1759,9.327
+KNN,0.1717,0.004
+MLP,0.1679,66.552
