@@ -13,12 +13,16 @@
 fraud_type_classification/
 ├── data/
 │   └── bank_fraud.csv
-├── data_analysis.py      аналіз набору даних
-├── preprocessing.py      підготовка та кодування даних
-├── models.py             навчання 
-├── visualization.py      зведена таблиця
+├── visualizations/
+│   ├── eda/              графіки EDA
+│   └── results/          матриці невідповідностей, t-SNE та таблиці
+├── reports/              звіти по класифікації у форматі CSV
+├── models/               збережені навчені моделі 
+├── data_analysis.py      аналіз набору даних (EDA)
+├── preprocessing.py      підготовка, балансування та кодування даних
+├── models.py             навчання та оцінка методів класифікації
+├── visualization.py      візуалізація підсумкових результатів
 ├── main.py               запуск 
-├── requirements.txt
-└── results/              графіки та таблиці результатів
+└── requirements.txt
 ```
 
